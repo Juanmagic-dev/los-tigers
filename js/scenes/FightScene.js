@@ -90,6 +90,9 @@ class FightScene extends Phaser.Scene {
   }
 
   create() {
+    setTouchControlsVisible(true);
+    this.events.once('shutdown', () => setTouchControlsVisible(false));
+
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys({ punch: 'A', kick: 'S', block: 'D', jump: 'W' });
 

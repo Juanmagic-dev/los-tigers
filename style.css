@@ -10,13 +10,67 @@ html, body {
   height: 100vh;
 }
 
-/* ===== Controles táctiles (solo pantallas táctiles) ===== */
+/* ===== Splash de apertura ===== */
+#splashOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background-color: #0a0e27;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  cursor: pointer;
+}
+
+#splashOverlay.hidden {
+  display: none;
+}
+
+@media (orientation: landscape) {
+  #splashOverlay {
+    background-image: url('assets/splash-landscape.png');
+  }
+}
+
+@media (orientation: portrait) {
+  #splashOverlay {
+    background-image: url('assets/splash-portrait.png');
+  }
+}
+
+#splashTapHint {
+  margin-bottom: 6vh;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  font-size: 16px;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
+  animation: splashPulse 1.4s infinite;
+}
+
+@media (orientation: portrait) {
+  #splashTapHint {
+    margin-bottom: 22vh;
+  }
+}
+
+@keyframes splashPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* ===== Controles táctiles (solo pantallas táctiles, y solo durante la pelea) ===== */
 #touchControls {
   display: none;
 }
 
 @media (hover: none) and (pointer: coarse) {
-  #touchControls {
+  #touchControls.fightActive {
     display: block;
   }
 }

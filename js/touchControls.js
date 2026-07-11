@@ -118,3 +118,10 @@ const TOUCH = (() => {
     consumeFireball,
   };
 })();
+
+// Los controles solo deben verse durante la pelea, no en las pantallas de
+// selección de personaje/skin/escalera (donde no hacen nada).
+function setTouchControlsVisible(visible) {
+  const el = document.getElementById('touchControls');
+  if (el) el.classList.toggle('fightActive', visible);
+}

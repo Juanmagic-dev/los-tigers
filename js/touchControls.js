@@ -10,6 +10,7 @@ const TOUCH = (() => {
     _punch: false,
     _kick: false,
     _fireball: false,
+    _block: false,
   };
 
   function consumeJump() { const v = state._jump; state._jump = false; return v; }
@@ -83,11 +84,23 @@ const TOUCH = (() => {
     });
   }
 
+  // El bloqueo se mantiene mientras el dedo esté apoyado en el botón,
+  // igual que la tecla D (isDown), no como un toque de un solo golpe.
+  function setupHoldButton(id, onDown, onUp) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.addEventListener('pointerdown', (e) => { e.preventDefault(); onDown(); });
+    btn.addEventListener('pointerup', (e) => { e.preventDefault(); onUp(); });
+    btn.addEventListener('pointercancel', (e) => { e.preventDefault(); onUp(); });
+    btn.addEventListener('pointerleave', (e) => { e.preventDefault(); onUp(); });
+  }
+
   function init() {
     setupJoystick();
     setupButton('btnPunch', () => { state._punch = true; });
     setupButton('btnKick', () => { state._kick = true; });
     setupButton('btnFireball', () => { state._fireball = true; });
+    setupHoldButton('btnBlock', () => { state._block = true; }, () => { state._block = false; });
   }
 
   if (document.readyState === 'loading') {
@@ -98,6 +111,7 @@ const TOUCH = (() => {
 
   return {
     get moveDir() { return state.moveDir; },
+    get blockHeld() { return state._block; },
     consumeJump,
     consumePunch,
     consumeKick,

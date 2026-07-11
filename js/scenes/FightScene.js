@@ -44,7 +44,7 @@ class Fighter {
     this.walkDir = 0;
     this.lastDownTime = -9999;
     this.fireballsLeft = FIREBALL_MAX;
-    this.sprite = scene.add.image(x, GROUND_Y, `body_${player.id}`).setScale(0.42).setOrigin(0.5, 1);
+    this.sprite = scene.add.image(x, GROUND_Y, charTextureKey('body', player)).setScale(0.42).setOrigin(0.5, 1);
     this.sprite.setFlipX(facing < 0);
   }
 
@@ -87,8 +87,6 @@ class FightScene extends Phaser.Scene {
     this.frozen = true;
     this.matchOver = false;
     this.timeLeft = 60;
-    this.roundEndTimer = null;
-    this.matchEndTimer = null;
   }
 
   create() {
@@ -96,6 +94,8 @@ class FightScene extends Phaser.Scene {
     this.keys = this.input.keyboard.addKeys({ punch: 'A', kick: 'S', block: 'D', jump: 'W' });
 
     this.drawStage();
+    generateBody(this, this.meData, 380);
+    generateBody(this, this.rivalData, 380);
     this.player = new Fighter(this, this.meData, 190, 1);
     this.cpu = new Fighter(this, this.rivalData, 530, -1);
     this.fireballs = [];
@@ -201,53 +201,35 @@ class FightScene extends Phaser.Scene {
     this.updateFirePips();
   }
 
+  // Vuelve a la pantalla de selección de jugador (abandona la pelea/escalera
+  // actual). Al cambiar de escena, Phaser cancela solo cualquier delayedCall
+  // o tween pendiente de esta escena, así que no hace falta limpiarlos a mano.
   buildRestartButton(width) {
-    const w = 108, h = 24, x = width / 2 - w / 2, y = 58;
+    const w = 150, h = 34, x = width / 2 - w / 2, y = 58;
     const bg = this.add.graphics().setDepth(19);
-    bg.fillStyle(0x1c2a5e, 0.9);
-    bg.fillRoundedRect(x, y, w, h, 8);
-    bg.lineStyle(2, 0x5a6ac0, 1);
-    bg.strokeRoundedRect(x, y, w, h, 8);
+    const paint = (fill, fillA, stroke) => {
+      bg.clear();
+      bg.fillStyle(fill, fillA);
+      bg.fillRoundedRect(x, y, w, h, 10);
+      bg.lineStyle(3, stroke, 1);
+      bg.strokeRoundedRect(x, y, w, h, 10);
+    };
+    paint(0xffd200, 0.95, 0x7a3b00);
 
-    this.add.text(width / 2, y + h / 2, '🔄 Reiniciar', {
-      fontSize: '13px', fontFamily: 'Arial Black', color: '#ffffff',
+    this.add.text(width / 2, y + h / 2, '🏠 MENÚ', {
+      fontSize: '16px', fontFamily: 'Arial Black', color: '#1a0a00',
     }).setOrigin(0.5).setDepth(20);
 
     const zone = this.add.zone(width / 2, y + h / 2, w, h).setInteractive({ useHandCursor: true }).setDepth(20);
     zone.on('pointerdown', () => {
       AUDIO.ensureCtx();
-      this.restartMatch();
+      this.registry.remove('ladder');
+      this.registry.remove('championId');
+      this.registry.remove('skinId');
+      this.scene.start('PlayerSelect');
     });
-    zone.on('pointerover', () => {
-      bg.clear();
-      bg.fillStyle(0x2a3a7e, 0.95);
-      bg.fillRoundedRect(x, y, w, h, 8);
-      bg.lineStyle(2, 0xffd200, 1);
-      bg.strokeRoundedRect(x, y, w, h, 8);
-    });
-    zone.on('pointerout', () => {
-      bg.clear();
-      bg.fillStyle(0x1c2a5e, 0.9);
-      bg.fillRoundedRect(x, y, w, h, 8);
-      bg.lineStyle(2, 0x5a6ac0, 1);
-      bg.strokeRoundedRect(x, y, w, h, 8);
-    });
-  }
-
-  // Reinicia la pelea actual (mismo rival) desde el round 1, cancelando
-  // cualquier transición de fin de round/partida que pudiera estar pendiente.
-  restartMatch() {
-    if (this.roundEndTimer) { this.roundEndTimer.remove(); this.roundEndTimer = null; }
-    if (this.matchEndTimer) { this.matchEndTimer.remove(); this.matchEndTimer = null; }
-    this.tweens.killTweensOf(this.resultText);
-    this.resultText.setText('').setAlpha(1).setScale(1);
-    this.roundNum = 1;
-    this.playerWins = 0;
-    this.cpuWins = 0;
-    this.matchOver = false;
-    this.updatePips();
-    this.resetFighters();
-    this.startRoundIntro();
+    zone.on('pointerover', () => paint(0xffe680, 1, 0xffffff));
+    zone.on('pointerout', () => paint(0xffd200, 0.95, 0x7a3b00));
   }
 
   drawHealthBars() {
@@ -303,12 +285,13 @@ class FightScene extends Phaser.Scene {
     this.updateFirePips();
   }
 
-  // El arma queda anclada cerca de la mano y se mueve poco: un empujón corto (golpe)
-  // o un hachazo en arco (patada), en vez de salir disparada hacia el rival.
+  // El puño/pie queda anclado cerca del cuerpo y se mueve poco: un empujón
+  // corto (golpe de puño) o un hachazo en arco (patada), en vez de salir
+  // disparado hacia el rival.
   spawnStrikeFx(f, moveType) {
-    const key = `weapon_${f.player.weapon}`;
+    const key = moveType === 'punch' ? 'fist' : 'shoe';
     const pivotX = f.x + f.facing * 20;
-    const pivotY = f.sprite.y - 78;
+    const pivotY = f.sprite.y - (moveType === 'punch' ? 78 : 34);
     const baseAngle = f.facing > 0 ? 0 : Math.PI;
     const img = this.add.image(pivotX, pivotY, key).setOrigin(0.15, 0.5).setScale(0.85).setDepth(6);
 
@@ -438,7 +421,7 @@ class FightScene extends Phaser.Scene {
       this.spawnStrikeFx(f, 'kick');
       return;
     }
-    if (this.keys.block.isDown) {
+    if (this.keys.block.isDown || TOUCH.blockHeld) {
       f.setState('block');
       return;
     }
@@ -574,7 +557,7 @@ class FightScene extends Phaser.Scene {
   applyHit(attacker, defender, dmg) {
     const blocked = defender.state === 'block';
     if (blocked) {
-      defender.health = Math.max(0, defender.health - Math.ceil(dmg * 0.15));
+      defender.health = Math.max(0, defender.health - Math.ceil(dmg * 0.2));
       AUDIO.block();
       this.cameras.main.shake(80, 0.002);
       defender.setState('blockstun');
@@ -626,8 +609,7 @@ class FightScene extends Phaser.Scene {
     if (winner === 'player') this.playerWins++; else this.cpuWins++;
     this.updatePips();
 
-    this.roundEndTimer = this.time.delayedCall(1600, () => {
-      this.roundEndTimer = null;
+    this.time.delayedCall(1600, () => {
       this.resultText.setText('');
       if (this.playerWins >= 2 || this.cpuWins >= 2) {
         this.endMatch(this.playerWins > this.cpuWins ? 'player' : 'cpu');
@@ -646,8 +628,7 @@ class FightScene extends Phaser.Scene {
       AUDIO.win();
       this.resultText.setText('¡GANASTE LA PELEA!').setScale(0.6).setAlpha(1);
       this.tweens.add({ targets: this.resultText, scale: 0.75, duration: 300, ease: 'Back.easeOut' });
-      this.matchEndTimer = this.time.delayedCall(1800, () => {
-        this.matchEndTimer = null;
+      this.time.delayedCall(1800, () => {
         const ladder = this.registry.get('ladder');
         advanceLadder(ladder);
         this.scene.start('Ladder', {});
@@ -656,8 +637,7 @@ class FightScene extends Phaser.Scene {
       AUDIO.lose();
       this.resultText.setText('PERDISTE...').setScale(0.6).setAlpha(1);
       this.tweens.add({ targets: this.resultText, scale: 0.75, duration: 300, ease: 'Back.easeOut' });
-      this.matchEndTimer = this.time.delayedCall(1800, () => {
-        this.matchEndTimer = null;
+      this.time.delayedCall(1800, () => {
         this.scene.start('GameOver', { me: this.meData, rival: this.rivalData });
       });
     }

@@ -20,16 +20,16 @@ const HAIR = {
 };
 
 const PLAYERS = [
-  { id: 'bauti', name: 'Bauti', club: 'boca', hair: HAIR.rubioLacio, eyes: 0x4a3728, build: 'normal', number: 1, weapon: 'regla' },
-  { id: 'fede', name: 'Fede', club: 'sanlorenzo', hair: HAIR.oscuroDespeinado, eyes: 0x3a7bd5, build: 'normal', number: 2, weapon: 'tijeras' },
-  { id: 'maxi', name: 'Maxi', club: 'river', hair: HAIR.rulos, eyes: 0x4a3728, build: 'grande', number: 3, weapon: 'compas' },
-  { id: 'rami', name: 'Rami', club: 'racing', hair: HAIR.rubioLacio, eyes: 0x4a3728, build: 'normal', number: 4, weapon: 'lapiz' },
-  { id: 'balta', name: 'Balta', club: 'river', hair: HAIR.rubioLacio, eyes: 0x4a3728, build: 'normal', number: 5, weapon: 'escuadra' },
-  { id: 'manu', name: 'Manu', club: 'boca', hair: HAIR.oscuroLacio, eyes: 0x4a3728, build: 'bajito', number: 6, weapon: 'sacapuntas' },
-  { id: 'santi', name: 'Santi', club: 'boca', hair: HAIR.oscuroCorto, eyes: 0x4a3728, build: 'normal', number: 7, weapon: 'birome' },
-  { id: 'fran', name: 'Fran', club: 'boca', hair: HAIR.elvis, eyes: 0x4a3728, build: 'normal', number: 8, weapon: 'marcador' },
-  { id: 'felix', name: 'Felix', club: 'river', hair: HAIR.oscuroCorto, eyes: 0x4a3728, build: 'bajito', number: 9, weapon: 'goma' },
-  { id: 'joaco', name: 'Joaco', club: 'boca', hair: HAIR.rubioLacio, eyes: 0x4a3728, build: 'grande', number: 10, weapon: 'cartuchera' },
-  { id: 'pedro', name: 'Pedro', club: 'independiente', hair: HAIR.oscuroCorto, eyes: 0x4a3728, build: 'normal', number: 11, weapon: 'corrector' },
-  { id: 'tomy', name: 'Tomy', club: 'river', hair: HAIR.oscuroCorto, eyes: 0x4a3728, build: 'bajito', number: 12, weapon: 'transportador' },
+  { id: 'bauti', name: 'Bauti', club: 'boca', hair: HAIR.rubioLacio, eyes: 0x4a3728, build: 'normal', number: 1 },
+  { id: 'fede', name: 'Fede', club: 'sanlorenzo', hair: HAIR.oscuroDespeinado, eyes: 0x3a7bd5, build: 'normal', number: 2 },
+  { id: 'maxi', name: 'Maxi', club: 'river', hair: HAIR.rulos, eyes: 0x4a3728, build: 'grande', number: 3 },
+  { id: 'rami', name: 'Rami', club: 'racing', hair: HAIR.rubioLacio, eyes: 0x4a3728, build: 'normal', number: 4 },
+  { id: 'balta', name: 'Balta', club: 'river', hair: HAIR.rubioLacio, eyes: 0x4a3728, build: 'normal', number: 5 },
+  { id: 'manu', name: 'Manu', club: 'boca', hair: HAIR.oscuroLacio, eyes: 0x4a3728, build: 'bajito', number: 6 },
+  { id: 'santi', name: 'Santi', club: 'boca', hair: HAIR.oscuroCorto, eyes: 0x4a3728, build: 'normal', number: 7 },
+  { id: 'fran', name: 'Fran', club: 'boca', hair: HAIR.elvis, eyes: 0x4a3728, build: 'normal', number: 8 },
+  { id: 'felix', name: 'Felix', club: 'river', hair: HAIR.oscuroCorto, eyes: 0x4a3728, build: 'bajito', number: 9 },
+  { id: 'joaco', name: 'Joaco', club: 'boca', hair: HAIR.rubioLacio, eyes: 0x4a3728, build: 'grande', number: 10 },
+  { id: 'pedro', name: 'Pedro', club: 'independiente', hair: HAIR.oscuroCorto, eyes: 0x4a3728, build: 'normal', number: 11 },
+  { id: 'tomy', name: 'Tomy', club: 'river', hair: HAIR.oscuroCorto, eyes: 0x4a3728, build: 'bajito', number: 12 },
 ];

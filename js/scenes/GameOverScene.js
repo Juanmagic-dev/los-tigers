@@ -14,7 +14,8 @@ class GameOverScene extends Phaser.Scene {
     bg.fillGradientStyle(0x3a0a0a, 0x3a0a0a, 0x120404, 0x120404, 1);
     bg.fillRect(0, 0, width, height);
 
-    this.add.image(width / 2, height / 2 - 90, `portrait_${this.rivalData.id}`).setScale(1.1);
+    generatePortrait(this, this.rivalData, 220);
+    this.add.image(width / 2, height / 2 - 90, charTextureKey('portrait', this.rivalData)).setScale(1.1);
     this.add.text(width / 2, height / 2 + 20, 'GAME OVER', {
       fontSize: '34px', fontFamily: 'Arial Black', color: '#ff5050', stroke: '#3a0000', strokeThickness: 6,
     }).setOrigin(0.5);
@@ -35,6 +36,7 @@ class GameOverScene extends Phaser.Scene {
     backBtn.on('pointerdown', () => {
       this.registry.remove('ladder');
       this.registry.remove('championId');
+      this.registry.remove('skinId');
       this.scene.start('PlayerSelect');
     });
   }

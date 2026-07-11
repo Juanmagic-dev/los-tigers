@@ -7,9 +7,10 @@ class BootScene extends Phaser.Scene {
     PLAYERS.forEach((p) => {
       generatePortrait(this, p, 220);
       generateBody(this, p, 380);
-      generateWeaponTexture(this, p.weapon);
     });
     generateFireballTexture(this);
+    generateFistTexture(this);
+    generateShoeTexture(this);
     this.scene.start('PlayerSelect');
   }
 }

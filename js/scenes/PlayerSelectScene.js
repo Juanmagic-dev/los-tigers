@@ -58,7 +58,7 @@ class PlayerSelectScene extends Phaser.Scene {
       drawCard(0x33427a, 2);
 
       const portraitBaseY = y - 10;
-      const portrait = this.add.image(x, portraitBaseY, `portrait_${p.id}`).setScale(0.42);
+      const portrait = this.add.image(x, portraitBaseY, charTextureKey('portrait', p)).setScale(0.42);
       const label = this.add.text(x, y + cardH / 2 - 22, p.name, {
         fontSize: '16px',
         fontFamily: 'Arial Black',
@@ -76,7 +76,7 @@ class PlayerSelectScene extends Phaser.Scene {
       });
       zone.on('pointerdown', () => {
         AUDIO.ensureCtx();
-        this.scene.start('Ladder', { championId: p.id });
+        this.scene.start('SkinSelect', { championId: p.id });
       });
     });
   }

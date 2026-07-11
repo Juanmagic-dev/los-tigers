@@ -60,9 +60,11 @@ html, body {
   z-index: 10;
 }
 
-#actionButtonsRow {
+#actionButtonsRow,
+#actionButtonsRow2 {
   display: flex;
   gap: 12px;
+  justify-content: flex-end;
 }
 
 .actionBtn {
@@ -92,7 +94,14 @@ html, body {
   width: 60px;
   height: 60px;
   font-size: 26px;
-  align-self: flex-end;
   background: rgba(255, 106, 26, 0.75);
   border-color: rgba(255, 200, 120, 0.9);
+}
+
+.actionBtn--block {
+  width: 60px;
+  height: 60px;
+  font-size: 24px;
+  background: rgba(30, 150, 160, 0.65);
+  border-color: rgba(150, 230, 235, 0.9);
 }

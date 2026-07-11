@@ -8,10 +8,12 @@ class LadderScene extends Phaser.Scene {
       this.ladder = buildLadder(PLAYERS, data.championId);
       this.registry.set('ladder', this.ladder);
       this.registry.set('championId', data.championId);
+      this.registry.set('skinId', data.skinId || 'default');
     } else {
       this.ladder = this.registry.get('ladder');
     }
-    this.champion = PLAYERS.find((p) => p.id === this.registry.get('championId'));
+    const base = PLAYERS.find((p) => p.id === this.registry.get('championId'));
+    this.champion = { ...base, skin: this.registry.get('skinId') || 'default' };
   }
 
   create() {
@@ -19,6 +21,9 @@ class LadderScene extends Phaser.Scene {
     const bg = this.add.graphics();
     bg.fillGradientStyle(0x0a1030, 0x0a1030, 0x162a5c, 0x1a1040, 1);
     bg.fillRect(0, 0, width, height);
+
+    generatePortrait(this, this.champion, 220);
+    generateBody(this, this.champion, 380);
 
     if (isLadderComplete(this.ladder)) {
       this.showChampion();
@@ -34,12 +39,12 @@ class LadderScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     const midY = height / 2 - 20;
-    this.add.image(width * 0.28, midY, `portrait_${this.champion.id}`).setScale(0.75);
+    this.add.image(width * 0.28, midY, charTextureKey('portrait', this.champion)).setScale(0.75);
     this.add.text(width * 0.28, midY + 130, this.champion.name, { fontSize: '20px', fontFamily: 'Arial Black', color: '#ffffff' }).setOrigin(0.5);
 
     this.add.text(width / 2, midY + 20, 'VS', { fontSize: '36px', fontFamily: 'Arial Black', color: '#ff5050' }).setOrigin(0.5);
 
-    this.add.image(width * 0.72, midY, `portrait_${opponent.id}`).setScale(0.75);
+    this.add.image(width * 0.72, midY, charTextureKey('portrait', opponent)).setScale(0.75);
     this.add.text(width * 0.72, midY + 130, opponent.name, { fontSize: '20px', fontFamily: 'Arial Black', color: '#ffffff' }).setOrigin(0.5);
     this.add.text(width * 0.72, midY + 150, CLUBS[opponent.club].name, { fontSize: '12px', color: '#9fb0d8' }).setOrigin(0.5);
 
@@ -55,7 +60,7 @@ class LadderScene extends Phaser.Scene {
 
   showChampion() {
     const { width, height } = this.scale;
-    this.add.image(width / 2, height / 2 - 70, `portrait_${this.champion.id}`).setScale(1.5);
+    this.add.image(width / 2, height / 2 - 70, charTextureKey('portrait', this.champion)).setScale(1.5);
     this.add.text(width / 2, height / 2 + 70, `¡${this.champion.name.toUpperCase()} ES EL CAMPEÓN!`, {
       fontSize: '24px', fontFamily: 'Arial Black', color: '#ffd200', stroke: '#7a3b00', strokeThickness: 5,
     }).setOrigin(0.5);
@@ -67,6 +72,7 @@ class LadderScene extends Phaser.Scene {
     btn.on('pointerdown', () => {
       this.registry.remove('ladder');
       this.registry.remove('championId');
+      this.registry.remove('skinId');
       this.scene.start('PlayerSelect');
     });
   }

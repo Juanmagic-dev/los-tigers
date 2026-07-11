@@ -9,6 +9,7 @@ class SkinSelectScene extends Phaser.Scene {
   }
 
   create() {
+    resizeToViewport(this);
     const { width, height } = this.scale;
     const bg = this.add.graphics();
     bg.fillGradientStyle(0x0a1030, 0x0a1030, 0x162a5c, 0x1a1040, 1);
@@ -18,13 +19,12 @@ class SkinSelectScene extends Phaser.Scene {
       fontSize: '20px', fontFamily: 'Arial Black', color: '#ffd200', stroke: '#7a3b00', strokeThickness: 4,
     }).setOrigin(0.5);
 
-    const cols = 4;
-    const cellW = 170;
-    const cellH = 132;
-    const cardW = 150;
-    const cardH = 124;
-    const startX = width / 2 - ((cols - 1) * cellW) / 2;
-    const startY = 122;
+    buildBackButton(this, () => this.scene.start('PlayerSelect'));
+
+    const { cols, cellW, cellH, startX, startY } = computeResponsiveGrid(width, height, SKINS.length, { topY: 90 });
+    const cardW = cellW * 0.9;
+    const cardH = cellH * 0.9;
+    const previewTargetH = 200;
 
     SKINS.forEach((skin, i) => {
       const col = i % cols;
@@ -32,7 +32,8 @@ class SkinSelectScene extends Phaser.Scene {
       const x = startX + col * cellW;
       const y = startY + row * cellH;
       const playerWithSkin = { ...this.champion, skin: skin.id };
-      const key = generateSkinPreview(this, playerWithSkin, 170);
+      const key = generateSkinPreview(this, playerWithSkin, previewTargetH);
+      const previewScale = (cardH * 0.74) / previewTargetH;
 
       const card = this.add.graphics();
       const paint = (fillColor, fillA, strokeColor) => {
@@ -44,7 +45,7 @@ class SkinSelectScene extends Phaser.Scene {
       };
       paint(0x1c2a5e, 0.85, 0x33427a);
 
-      this.add.image(x, y - 16, key).setScale(0.58);
+      this.add.image(x, y - cardH * 0.13, key).setScale(previewScale);
       this.add.text(x, y + cardH / 2 - 16, skin.name, {
         fontSize: '13px', fontFamily: 'Arial Black', color: '#ffffff', align: 'center', wordWrap: { width: cardW - 10 },
       }).setOrigin(0.5);

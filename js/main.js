@@ -6,7 +6,7 @@ const config = {
   backgroundColor: '#0a0e27',
   scale: {
     mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
+    autoCenter: Phaser.Scale.NO_CENTER,
   },
   scene: [BootScene, PlayerSelectScene, SkinSelectScene, LadderScene, FightScene, GameOverScene],
 };

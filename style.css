@@ -8,6 +8,9 @@ html, body {
 #game {
   width: 100vw;
   height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ===== Splash de apertura ===== */
@@ -16,7 +19,8 @@ html, body {
   inset: 0;
   z-index: 100;
   background-color: #0a0e27;
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
   display: flex;
   align-items: flex-end;

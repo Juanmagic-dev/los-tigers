@@ -17,6 +17,7 @@ class LadderScene extends Phaser.Scene {
   }
 
   create() {
+    resizeToFightSize(this);
     const { width, height } = this.scale;
     const bg = this.add.graphics();
     bg.fillGradientStyle(0x0a1030, 0x0a1030, 0x162a5c, 0x1a1040, 1);
@@ -33,6 +34,8 @@ class LadderScene extends Phaser.Scene {
     const opponent = currentOpponent(this.ladder);
     const fightNum = this.ladder.index + 1;
     const total = this.ladder.opponents.length;
+
+    buildBackButton(this, () => this.scene.start('SkinSelect', { championId: this.registry.get('championId') }));
 
     this.add.text(width / 2, 36, `PELEA ${fightNum} DE ${total}`, {
       fontSize: '24px', fontFamily: 'Arial Black', color: '#ffd200', stroke: '#7a3b00', strokeThickness: 5,

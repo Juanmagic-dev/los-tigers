@@ -4,6 +4,7 @@ class PlayerSelectScene extends Phaser.Scene {
   }
 
   create() {
+    resizeToViewport(this);
     const { width, height } = this.scale;
 
     const bg = this.add.graphics();
@@ -26,13 +27,9 @@ class PlayerSelectScene extends Phaser.Scene {
       color: '#c7d2f0',
     }).setOrigin(0.5);
 
-    const cols = 4;
-    const cellW = 172;
-    const cellH = 132;
-    const cardW = 156;
-    const cardH = 120;
-    const startX = width / 2 - ((cols - 1) * cellW) / 2;
-    const startY = 148;
+    const { cols, cellW, cellH, startX, startY } = computeResponsiveGrid(width, height, PLAYERS.length, { topY: 100 });
+    const cardW = cellW * 0.9;
+    const cardH = cellH * 0.88;
 
     PLAYERS.forEach((p, i) => {
       const col = i % cols;
@@ -57,8 +54,9 @@ class PlayerSelectScene extends Phaser.Scene {
       };
       drawCard(0x33427a, 2);
 
-      const portraitBaseY = y - 10;
-      const portrait = this.add.image(x, portraitBaseY, charTextureKey('portrait', p)).setScale(0.42);
+      const portraitBaseY = y - cardH * 0.08;
+      const portraitScale = Math.min((cardH * 0.78) / 220, (cardW * 0.85) / 169);
+      const portrait = this.add.image(x, portraitBaseY, charTextureKey('portrait', p)).setScale(portraitScale);
       const label = this.add.text(x, y + cardH / 2 - 22, p.name, {
         fontSize: '16px',
         fontFamily: 'Arial Black',

@@ -1,0 +1,14 @@
+const config = {
+  type: Phaser.AUTO,
+  width: 720,
+  height: 480,
+  parent: 'game',
+  backgroundColor: '#0a0e27',
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+  scene: [BootScene, PlayerSelectScene, LadderScene, FightScene, GameOverScene],
+};
+
+window.game = new Phaser.Game(config);

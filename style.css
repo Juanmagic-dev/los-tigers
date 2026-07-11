@@ -28,8 +28,8 @@ html, body {
   width: 96px;
   height: 96px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: rgba(200, 20, 20, 0.18);
+  border: 2px solid rgba(230, 40, 40, 0.5);
   touch-action: none;
   z-index: 10;
 }
@@ -43,8 +43,8 @@ html, body {
   margin-left: -22px;
   margin-top: -22px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.55);
-  border: 2px solid rgba(255, 255, 255, 0.8);
+  background: rgba(224, 30, 30, 0.9);
+  border: 2px solid rgba(255, 110, 110, 0.95);
   pointer-events: none;
   transition: transform 0.03s linear;
 }

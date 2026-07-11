@@ -87,6 +87,8 @@ class FightScene extends Phaser.Scene {
     this.frozen = true;
     this.matchOver = false;
     this.timeLeft = 60;
+    this.roundEndTimer = null;
+    this.matchEndTimer = null;
   }
 
   create() {
@@ -186,6 +188,8 @@ class FightScene extends Phaser.Scene {
       fontSize: '40px', fontFamily: 'Arial Black', color: '#ffd200', stroke: '#000000', strokeThickness: 6,
     }).setOrigin(0.5).setDepth(20);
 
+    this.buildRestartButton(width);
+
     this.add.text(width / 2, this.scale.height - 28, '← → moverte   W saltar   A golpe   S patada   D bloquear', {
       fontSize: '12px', color: 'rgba(255,255,255,0.8)',
     }).setOrigin(0.5);
@@ -195,6 +199,55 @@ class FightScene extends Phaser.Scene {
 
     this.drawHealthBars();
     this.updateFirePips();
+  }
+
+  buildRestartButton(width) {
+    const w = 108, h = 24, x = width / 2 - w / 2, y = 58;
+    const bg = this.add.graphics().setDepth(19);
+    bg.fillStyle(0x1c2a5e, 0.9);
+    bg.fillRoundedRect(x, y, w, h, 8);
+    bg.lineStyle(2, 0x5a6ac0, 1);
+    bg.strokeRoundedRect(x, y, w, h, 8);
+
+    this.add.text(width / 2, y + h / 2, '🔄 Reiniciar', {
+      fontSize: '13px', fontFamily: 'Arial Black', color: '#ffffff',
+    }).setOrigin(0.5).setDepth(20);
+
+    const zone = this.add.zone(width / 2, y + h / 2, w, h).setInteractive({ useHandCursor: true }).setDepth(20);
+    zone.on('pointerdown', () => {
+      AUDIO.ensureCtx();
+      this.restartMatch();
+    });
+    zone.on('pointerover', () => {
+      bg.clear();
+      bg.fillStyle(0x2a3a7e, 0.95);
+      bg.fillRoundedRect(x, y, w, h, 8);
+      bg.lineStyle(2, 0xffd200, 1);
+      bg.strokeRoundedRect(x, y, w, h, 8);
+    });
+    zone.on('pointerout', () => {
+      bg.clear();
+      bg.fillStyle(0x1c2a5e, 0.9);
+      bg.fillRoundedRect(x, y, w, h, 8);
+      bg.lineStyle(2, 0x5a6ac0, 1);
+      bg.strokeRoundedRect(x, y, w, h, 8);
+    });
+  }
+
+  // Reinicia la pelea actual (mismo rival) desde el round 1, cancelando
+  // cualquier transición de fin de round/partida que pudiera estar pendiente.
+  restartMatch() {
+    if (this.roundEndTimer) { this.roundEndTimer.remove(); this.roundEndTimer = null; }
+    if (this.matchEndTimer) { this.matchEndTimer.remove(); this.matchEndTimer = null; }
+    this.tweens.killTweensOf(this.resultText);
+    this.resultText.setText('').setAlpha(1).setScale(1);
+    this.roundNum = 1;
+    this.playerWins = 0;
+    this.cpuWins = 0;
+    this.matchOver = false;
+    this.updatePips();
+    this.resetFighters();
+    this.startRoundIntro();
   }
 
   drawHealthBars() {
@@ -333,7 +386,7 @@ class FightScene extends Phaser.Scene {
   }
 
   updateFighterInput(f, dt) {
-    if (LOCKED_STATES.includes(f.state) || f.state === 'jump') return;
+    if (LOCKED_STATES.includes(f.state)) return;
 
     if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) {
       f.lastDownTime = this.time.now;
@@ -346,6 +399,20 @@ class FightScene extends Phaser.Scene {
     const touchKick = TOUCH.consumeKick();
     const touchJump = TOUCH.consumeJump();
     const touchDir = TOUCH.moveDir;
+
+    // El movimiento se aplica primero y funciona también en el aire, para
+    // poder saltar en diagonal (mover + saltar a la vez, no uno y después
+    // el otro). No cambia el estado si está en el aire: eso rompería la
+    // física del salto, que depende de que el estado siga siendo 'jump'.
+    if (this.cursors.left.isDown || this.cursors.right.isDown || touchDir !== 0) {
+      const dir = touchDir !== 0 ? touchDir : (this.cursors.left.isDown ? -1 : 1);
+      f.x = Phaser.Math.Clamp(f.x + dir * MOVE_SPEED * dt, STAGE_LEFT, STAGE_RIGHT);
+      if (f.grounded) f.setState('walk');
+    } else if (f.grounded) {
+      f.setState('idle');
+    }
+
+    if (!f.grounded) return; // ataques, salto y bloqueo solo se inician parado
 
     // El botón táctil de fuego es directo (sin necesidad de la combinación de teclado)
     if (touchFireball) {
@@ -371,23 +438,15 @@ class FightScene extends Phaser.Scene {
       this.spawnStrikeFx(f, 'kick');
       return;
     }
-    if (this.keys.block.isDown && f.grounded) {
+    if (this.keys.block.isDown) {
       f.setState('block');
       return;
     }
-    if ((Phaser.Input.Keyboard.JustDown(this.cursors.up) || Phaser.Input.Keyboard.JustDown(this.keys.jump) || touchJump) && f.grounded) {
+    if (Phaser.Input.Keyboard.JustDown(this.cursors.up) || Phaser.Input.Keyboard.JustDown(this.keys.jump) || touchJump) {
       f.jumpVel = JUMP_VEL;
       f.grounded = false;
       f.setState('jump');
       AUDIO.jump();
-      return;
-    }
-    if (this.cursors.left.isDown || this.cursors.right.isDown || touchDir !== 0) {
-      const dir = touchDir !== 0 ? touchDir : (this.cursors.left.isDown ? -1 : 1);
-      f.x = Phaser.Math.Clamp(f.x + dir * MOVE_SPEED * dt, STAGE_LEFT, STAGE_RIGHT);
-      f.setState('walk');
-    } else {
-      f.setState('idle');
     }
   }
 
@@ -567,7 +626,8 @@ class FightScene extends Phaser.Scene {
     if (winner === 'player') this.playerWins++; else this.cpuWins++;
     this.updatePips();
 
-    this.time.delayedCall(1600, () => {
+    this.roundEndTimer = this.time.delayedCall(1600, () => {
+      this.roundEndTimer = null;
       this.resultText.setText('');
       if (this.playerWins >= 2 || this.cpuWins >= 2) {
         this.endMatch(this.playerWins > this.cpuWins ? 'player' : 'cpu');
@@ -586,7 +646,8 @@ class FightScene extends Phaser.Scene {
       AUDIO.win();
       this.resultText.setText('¡GANASTE LA PELEA!').setScale(0.6).setAlpha(1);
       this.tweens.add({ targets: this.resultText, scale: 0.75, duration: 300, ease: 'Back.easeOut' });
-      this.time.delayedCall(1800, () => {
+      this.matchEndTimer = this.time.delayedCall(1800, () => {
+        this.matchEndTimer = null;
         const ladder = this.registry.get('ladder');
         advanceLadder(ladder);
         this.scene.start('Ladder', {});
@@ -595,7 +656,8 @@ class FightScene extends Phaser.Scene {
       AUDIO.lose();
       this.resultText.setText('PERDISTE...').setScale(0.6).setAlpha(1);
       this.tweens.add({ targets: this.resultText, scale: 0.75, duration: 300, ease: 'Back.easeOut' });
-      this.time.delayedCall(1800, () => {
+      this.matchEndTimer = this.time.delayedCall(1800, () => {
+        this.matchEndTimer = null;
         this.scene.start('GameOver', { me: this.meData, rival: this.rivalData });
       });
     }

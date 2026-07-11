@@ -3,6 +3,9 @@ html, body {
   padding: 0;
   background: #0a0e27;
   overflow: hidden;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 #game {
